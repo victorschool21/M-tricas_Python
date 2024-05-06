@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métricas Python</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-top: 50px;
+        }
+        form {
+            margin-top: 30px;
+        }
+        #code {
+            width: 80%;
+            height: 200px;
+            margin-bottom: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            background-color: black;
+            color: #6cc644; /* Cor verde */
+            font-family: monospace; /* Monospace para aparência de terminal */
+            position: relative;
+        }
+        #code::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -5px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent black;
+        }
+        button {
+  border: none;
+  outline: none;
+  background-color: #00cc11;
+  padding: 10px 20px;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 5px;
+  transition: all ease 0.1s;
+  box-shadow: 0px 5px 0px 0px #178700;
+}
+
+button:active {
+  transform: translateY(5px);
+  box-shadow: 0px 0px 0px 0px #178700;
+}
+        #result {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 5 colunas com tamanho igual */
+            gap: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .metric-item {
+            background-color: #1a1a1a; /* Fundo preto */
+            color: #a0a0a0; /* Texto cinza */
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .dots-container {
+            display: flex;
+            padding: 10px;
+            flex-direction: row;
+            margin-right: 1px;
+        }
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+        }
+        .dot-red {
+            background-color: #ff5f56; /* Vermelho */
+        }
+        .dot-yellow {
+            background-color: #ffbd2e;
+            margin-left: 4px;
+            margin-right: 4px; /* Amarelo */
+        }
+        .dot-green {
+            background-color: #6cc644; /* Verde */
+        }
+        .metric-item h2 {
+            color: #fff;
+            font-size: 20px;
+            margin-top: 0;
+        }
+        .metric-item p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Métricas do seu Código Python</h1>
+    <form id="codeForm">
+        <textarea id="code" name="code" placeholder="Cole o seu código Python aqui..."></textarea><br>
+        <button type="button" id="submitBtn" onclick="submitCode()">Enviar</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        function submitCode() {
+            var code = document.getElementById("code").value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/submit", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        var resultDiv = document.getElementById("result");
+                        resultDiv.innerHTML = "";
+                        var counter = 1;
+                        for (var metric in response.metrics) {
+                            var value = response.metrics[metric];
+                            resultDiv.innerHTML += "<div class='metric-item'><div class='dots-container'><div class='dot dot-red'></div><div class='dot dot-yellow'></div><div class='dot dot-green'></div></div><h2>" + metric.replace(/_/g, ' ') + "</h2><p>" + value + "</p></div>";
+                            counter++;
+                        }
+                    } else {
+                        console.log("Erro ao executar o código: " + response.error);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({code: code}));
+        }
+    </script>
+</body>
+</html>
